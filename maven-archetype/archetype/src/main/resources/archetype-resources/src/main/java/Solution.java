@@ -1,9 +1,13 @@
 package ${package};
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 /**
  * Advent of Code ${year} - Day ${day}
  */
-public class App 
+public class Solution
 {
     public static void main(String[] args) throws IOException
     {

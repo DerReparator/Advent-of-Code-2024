@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Advent of Code 2024 - Day 01
@@ -64,8 +66,35 @@ public class Solution
 	 * @return The solution to the second part.
 	 */
 	protected static Object solvePart2(String input) {
-		// TODO Auto-generated method stub
-		return null;
+		List<Integer> firstList = new ArrayList<Integer>();
+		List<Integer> secondList = new ArrayList<Integer>();
+		
+		for (String line : input.lines().toArray(String[]::new)) {
+			String[] splitLine = line.split("   ");
+			
+			firstList.add(Integer.parseInt(splitLine[0]));
+			secondList.add(Integer.parseInt(splitLine[1]));
+		}
+
+		int similarityScore = 0;
+
+		// maps an integer to its count in second list
+		Map<Integer, Integer> counts = new HashMap<Integer, Integer>();
+		for (int i : firstList) {
+			if (!counts.containsKey(i)) {
+				int count = 0;
+				for (int j : secondList) {
+					if (j == i) {
+						++count;
+					}
+				}
+				counts.put(i, count);
+			}
+
+			similarityScore += counts.get(i) * i;
+		}
+
+		return similarityScore;
 	}
 
 }

@@ -52,6 +52,8 @@ public class Solution
 		String numbers = mulInstr.substring("mul(".length(), mulInstr.length() - 1);
 		String[] splitNumbers = numbers.split(",");
 
+//		System.out.println("Found %3s * %3s".formatted(splitNumbers[0], splitNumbers[1]));
+
 		return Integer.parseInt(splitNumbers[0]) * Integer.parseInt(splitNumbers[1]);
 	}
 
@@ -63,8 +65,18 @@ public class Solution
 	 */
 	protected static Object solvePart2(String input) {
 		// pre process the do / don't instructions and then run Part1
-		String removedDonts = input.replaceAll("don't\\(\\).*do\\(\\)", "");
+		/* String.join("", input.split(System.lineSeparator())) */
+		String singleLine = String.join("", input.split(System.lineSeparator()));
+		
+		int sum = 0;
 
-		return solvePart1(removedDonts);
+		String[] guaranteedEnabled = singleLine.split("do\\(\\)");
+
+		for (String doString : guaranteedEnabled) {
+			String[] firstSplitIsEnabled = doString.split("don't\\(\\)");
+			sum += (int)solvePart1(firstSplitIsEnabled[0]);
+		}
+
+		return sum;
 	}
 }

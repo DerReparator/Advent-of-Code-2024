@@ -62,7 +62,9 @@ public class Solution
 	 * @return The solution to the second part.
 	 */
 	protected static Object solvePart2(String input) {
-		/* TODO your solution for Part 2 goes here. */        
-        return "";
+		// pre process the do / don't instructions and then run Part1
+		String removedDonts = input.replaceAll("don't\\(\\).*do\\(\\)", "");
+
+		return solvePart1(removedDonts);
 	}
 }

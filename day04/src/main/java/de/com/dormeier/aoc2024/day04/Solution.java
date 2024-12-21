@@ -19,7 +19,7 @@ public class Solution
 		String inputPart1 = String.join(System.lineSeparator(), Files.readAllLines(Paths.get(args[0])));
 		String inputPart2 = String.join(System.lineSeparator(), Files.readAllLines(Paths.get(args[1])));
 
-		Object solutionPart1 = solvePart1(inputPart1);
+		Object solutionPart1 = null;// solvePart1(inputPart1);
 		Object solutionPart2 = solvePart2(inputPart2);
 
 		System.out.println("Solution Part 1: " + solutionPart1);
@@ -152,7 +152,25 @@ public class Solution
 	 * @return The solution to the second part.
 	 */
 	protected static Object solvePart2(String input) {
-		/* TODO your solution for Part 2 goes here. */        
-        return "";
+		String[] splitLines = input.split(System.lineSeparator());
+
+		int occurrences = 0;
+
+		for (int lineIndex = 1; lineIndex < splitLines.length - 1; ++lineIndex) {
+			for (int charIndex = 1; charIndex < splitLines[lineIndex].length() - 1; ++charIndex) {
+				if (splitLines[lineIndex].charAt(charIndex) == 'A') {
+					String surrounding = ""
+							+ splitLines[lineIndex - 1].charAt(charIndex - 1)
+							+ splitLines[lineIndex - 1].charAt(charIndex + 1)
+							+ splitLines[lineIndex + 1].charAt(charIndex - 1)
+							+ splitLines[lineIndex + 1].charAt(charIndex + 1);
+
+					occurrences += surrounding.equals("MSMS") || surrounding.equals("MMSS")
+							|| surrounding.equals("SSMM") || surrounding.equals("SMSM") ? 1 : 0;
+				}
+			}
+		}
+
+		return occurrences;
 	}
 }

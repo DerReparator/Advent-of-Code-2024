@@ -5,6 +5,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -72,6 +76,13 @@ public class Solution
 		return sum;
 	}
 
+	/**
+	 * For Part 1
+	 * 
+	 * @param allRules
+	 * @param update
+	 * @return
+	 */
 	private static boolean IsUpdateValid(List<Entry<Integer, Integer>> allRules, List<Integer> update) {
 		for (int currIndex = update.size() - 1; currIndex >= 0; --currIndex) {
 			for (int indexBeforeIt = currIndex - 1; indexBeforeIt >= 0; --indexBeforeIt) {
@@ -94,7 +105,90 @@ public class Solution
 	 * @return The solution to the second part.
 	 */
 	protected static Object solvePart2(String input) {
-		/* TODO your solution for Part 2 goes here. */        
-        return "";
+		Map<Integer, Collection<Integer>> allRules = new HashMap<>();
+		List<List<Integer>> allUpdates = new ArrayList<List<Integer>>();
+
+		String[] inputLineByLine = input.split(System.lineSeparator());
+		int parseIndex = 0;
+		while (!inputLineByLine[parseIndex].equals("")) {
+			String[] rule = inputLineByLine[parseIndex].split("\\|");
+			
+			int predecessor = Integer.parseInt(rule[0]);
+			int successor = Integer.parseInt(rule[1]);
+			
+			if (!allRules.containsKey(predecessor)) {
+				allRules.put(predecessor, new HashSet<Integer>());
+			}
+			allRules.get(predecessor).add(successor);
+
+			++parseIndex;
+		}
+
+		++parseIndex; // skip empty line
+
+		while (parseIndex < inputLineByLine.length) {
+			String[] update = inputLineByLine[parseIndex++].split(",");
+			allUpdates.add(Arrays.stream(update).map(Integer::parseInt).collect(Collectors.toList()));
+		}
+
+		int sum = 0;
+
+		for (List<Integer> update : allUpdates) {
+			if (!IsUpdateValid(allRules, update)) {
+				System.out.println("INVALID update: " + update);
+				List<Integer> orderedUpdate = OrderUpdateCorrectly(allRules, update);
+				sum += orderedUpdate.get(orderedUpdate.size() / 2);
+			} else {
+				System.out.println("VALID update: " + update);
+			}
+		}
+
+		return sum;
+	}
+
+	/**
+	 * For Part 2
+	 * 
+	 * @param allRules
+	 * @param update
+	 * @return
+	 */
+	private static boolean IsUpdateValid(Map<Integer, Collection<Integer>> allRules, List<Integer> update) {
+		for (int currIndex = update.size() - 1; currIndex >= 0; --currIndex) {
+			if (!allRules.containsKey(update.get(currIndex)))
+				continue; // no rule present for this combination
+			for (int indexBeforeIt = currIndex - 1; indexBeforeIt >= 0; --indexBeforeIt) {
+				if (allRules.get(update.get(currIndex)).contains(update.get(indexBeforeIt))) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	private static List<Integer> OrderUpdateCorrectly(Map<Integer, Collection<Integer>> allRules,
+			List<Integer> update) {
+		System.out.print("Sorting " + update + " -> ");
+
+		update.sort(new Comparator<Integer>() {
+			@Override
+			public int compare(Integer i, Integer j) {
+				if (i == j) {
+					return 0;
+				}
+
+				if (allRules.containsKey(i)) {
+					if (allRules.get(i).contains(j)) {
+						return -1;
+					}
+				}
+
+				return 1;
+			}
+		});
+
+		System.out.println(update);
+		return update;
 	}
 }

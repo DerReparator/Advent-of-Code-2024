@@ -3,8 +3,12 @@ package de.com.dormeier.aoc2024.day06;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import io.hosuaby.inject.resources.junit.jupiter.GivenTextResource;
 import io.hosuaby.inject.resources.junit.jupiter.TestWithResources;
@@ -26,5 +30,17 @@ public class TestPart2 {
 		Object result = Solution.solvePart2(inputPart2_1);
 
 		assertEquals(expectedPart2_1, result.toString());
+	}
+
+	private static Stream<Arguments> provideMovementTurnLeftParameters() {
+		return Stream.of(Arguments.of(Movement.UP, Movement.LEFT), Arguments.of(Movement.RIGHT, Movement.UP),
+				Arguments.of(Movement.DOWN, Movement.RIGHT), Arguments.of(Movement.LEFT, Movement.DOWN));
+
+	}
+
+	@ParameterizedTest
+	@MethodSource("provideMovementTurnLeftParameters")
+	public void movementTurnRight_ShouldReturnCorrectMovement(Movement initialMovement, Movement expectedMovement) {
+		assertEquals(expectedMovement, initialMovement.turnLeft());
 	}
 }

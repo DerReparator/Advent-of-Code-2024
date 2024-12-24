@@ -2,6 +2,7 @@ package de.com.dormeier.aoc2024.day06;
 
 import java.awt.Point;
 import java.io.IOException;
+import java.lang.foreign.Linker.Option;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -13,10 +14,8 @@ import java.util.stream.Collectors;
 /**
  * Advent of Code 2024 - Day 06
  */
-public class Solution
-{
-    public static void main(String[] args) throws IOException
-    {
+public class Solution {
+	public static void main(String[] args) throws IOException {
 		if (args.length != 2) {
 			System.out.println("Invalid args. Expected exactly 2 args: pathToInputDay1 pathToInputDay2");
 			return;
@@ -28,15 +27,14 @@ public class Solution
 		Object solutionPart1 = solvePart1(inputPart1);
 		// Object solutionPart2 = solvePart2(inputPart2);
 
-
 		System.out.println("Solution Part 1: " + solutionPart1);
 		// System.out.println("Solution Part 2: " + solutionPart2);
-    }
+	}
 
 	private static final char BARRIER = '#';
 	private static final char MOVE_UP = '^';
 
-    /**
+	/**
 	 * Solve the first part.
 	 * 
 	 * @param input The textual input
@@ -44,11 +42,11 @@ public class Solution
 	 */
 	protected static Object solvePart1(String input) {
 		String[] map = input.split(System.lineSeparator());
-		
+
 		Movement currMovement = Movement.UP;
 		Optional<Point> currPos = Optional.empty();
 		Set<Point> visited = new HashSet<>();
-		
+
 		/* find current position */
 		for (int line = 0; line < map.length; ++line) {
 			int posInRow = map[line].indexOf(MOVE_UP);
@@ -63,7 +61,7 @@ public class Solution
 			System.out.println("Moved to " + currPos);
 			currMovement = currMovement.turnRight();
 		} while (currPos.isPresent());
-		
+
 		printVisitedMap(map, visited);
 
 		return visited.size();
@@ -112,8 +110,7 @@ public class Solution
 			for (int col = 0; col < map[line].length(); ++col) {
 				if (visitedLocations.contains(new Point(col, line))) {
 					System.out.print('X');
-				}
-				else {
+				} else {
 					System.out.print(map[line].charAt(col));
 				}
 			}
@@ -148,13 +145,79 @@ public class Solution
 			System.out.println("Moved to " + currPos);
 			currMovement = currMovement.turnRight();
 		} while (currPos.isPresent());
-		
+
+		System.out.println("The Guard initially visited:");
 		printVisitedMap(map,
 				initialGuardPath.stream().map(pointWithMove -> pointWithMove.pos()).collect(Collectors.toList()));
 
-		return initialGuardPath.size();
+		Set<Point> possibleNewBarriers = findAllBarriers(map, initialGuardPath);
+
+		return possibleNewBarriers.size();
 	}
 
+	private static Set<Point> findAllBarriers(String[] map, Set<PointWithMovement> initialGuardPath) {
+		Set<Point> possibleBarriers = new HashSet<>();
+		
+		for (PointWithMovement possibleStepBeforeNewBarrier : initialGuardPath){
+			if (!isStepBeforeBounds(map, possibleStepBeforeNewBarrier)
+						&& !isStepAtBarrier(map, possibleStepBeforeNewBarrier)){
+				walkUntilExactPathCrossing(map, new PointWithMovement(possibleStepBeforeNewBarrier.pos(), possibleStepBeforeNewBarrier.direction().turnRight()), initialGuardPath);
+			}
+		}
+
+		return possibleBarriers;
+	}
+												
+	private static Optional<PointWithMovement> walkUntilExactPathCrossing(String[] map, PointWithMovement currPosition, Set<PointWithMovement> initialGuardPath) {
+		do {
+
+			Point nextPosition = new Point(currPosition.pos().x + currPosition.direction().horizontal,
+					currPosition.pos().y + currPosition.direction().vertical);
+
+			if (isOutOfBounds(map, nextPosition)) {
+				return Optional.empty();
+			}
+
+			// the path trace hits the initial guard path
+			if (initialGuardPath.contains(new PointWithMovement(nextPosition, currPosition.direction()))){
+				return Optional.of(currPosition);
+			}
+
+			// the path trace hits a barrier and then hits the initial guard path
+			if (map[nextPosition.y].charAt(nextPosition.x) == BARRIER) {
+				if (initialGuardPath.contains(new PointWithMovement(nextPosition, currPosition.direction().turnRight()))){
+					return Optional.of(currPosition);
+				}
+				else{
+					return Optional.empty();
+				}
+			} 
+			currPosition = new PointWithMovement(new Point(nextPosition), currPosition.direction());
+		} while (true);
+	}
+
+	/**
+	 * This method checks if the given {@code possibleStepBeforeNewBarrier} is a step in front of a barrier.
+	 * 
+	 * It assumes that the step is already turned right.
+	 * @param map
+	 * @param possibleStepBeforeNewBarrier
+	 * @return
+	 */
+	private static boolean isStepAtBarrier(String[] map, PointWithMovement possibleStepBeforeNewBarrier) {
+		Point nextPosition = new Point(possibleStepBeforeNewBarrier.pos().x + possibleStepBeforeNewBarrier.direction().turnLeft().horizontal,
+		possibleStepBeforeNewBarrier.pos().y + possibleStepBeforeNewBarrier.direction().turnLeft().vertical);
+
+		return map[nextPosition.y].charAt(nextPosition.x) == BARRIER;
+	}
+						
+	private static boolean isStepBeforeBounds(String[] map, PointWithMovement possibleStepBeforeNewBarrier) {
+		Point nextPosition = new Point(possibleStepBeforeNewBarrier.pos().x + possibleStepBeforeNewBarrier.direction().horizontal,
+		possibleStepBeforeNewBarrier.pos().y + possibleStepBeforeNewBarrier.direction().vertical);
+		
+		return isOutOfBounds(map, nextPosition);
+	}
+			
 	/**
 	 * For Part 2.
 	 * 
@@ -187,8 +250,7 @@ public class Solution
 						currPosition.direction().turnRight());
 				visited.add(turnedCurrPosition);
 				return Optional.of(turnedCurrPosition);
-			}
-			else {
+			} else {
 				visited.add(currPosition);
 			}
 

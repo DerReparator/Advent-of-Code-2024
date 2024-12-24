@@ -18,4 +18,12 @@ public enum Movement {
 	public Movement turnRight() {
 		return Movement.values()[(this.ordinal() + 1) % Movement.values().length];
 	}
+
+	public Movement turnLeft(){
+		int ordinalToTheLeft = this.ordinal() - 1;
+		if (ordinalToTheLeft < 0){
+			ordinalToTheLeft = LEFT.ordinal();
+		}
+		return Movement.values()[ordinalToTheLeft];
+	}
 }

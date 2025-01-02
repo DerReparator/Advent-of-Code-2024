@@ -7,9 +7,38 @@ void setup() {
   map = loadStrings("day06_part_1_test1.input");
 }
 
+public enum Movement {
+
+  UP(-1, 0),
+  RIGHT(0,1),
+  DOWN(1,0),
+  LEFT(0, -1);
+
+  public final int vertical;
+  public final int horizontal;
+
+  Movement(int vertical, int horizontal) {
+    this.vertical = vertical;
+    this.horizontal = horizontal;
+  }
+
+  public Movement turnRight() {
+    return Movement.values()[(this.ordinal() + 1) % Movement.values().length];
+  }
+
+  public Movement turnLeft(){
+    int ordinalToTheLeft = this.ordinal() - 1;
+    if (ordinalToTheLeft < 0){
+      ordinalToTheLeft = LEFT.ordinal();
+    }
+    return Movement.values()[ordinalToTheLeft];
+  }
+}
+
 PFont labelFont;
 
 String[] map;
+
 static final int size_in_pixel = 600;
 final int COLOR_OBSTRUCTION = 0;
 final int COLOR_FLOOR = 150;
@@ -69,7 +98,15 @@ void draw() {
 * Perform a single step based on the current map.
 */
 void doStep(){
-  
+  for (int x = 0; x < map[0].length(); ++x){
+   for (int y = 0; y < map.length; ++y){
+     
+   }
+  }
+}
+
+boolean isOutOfBounds(int x, int y) {
+  return x >= 0 && x < map[0].length() && y >= 0 && y < map.length;
 }
 
 void keyPressed() {

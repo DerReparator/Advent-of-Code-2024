@@ -2,27 +2,30 @@ import java.util.Optional;
 
 void setup() {
   size(600, 600);
+  frameRate(1000);
   surface.setTitle("AoC 2024 - Day 06, Part 1");
   
   labelFont = createFont("Arial", 14, true);
   
-  map = loadStrings("day06_part_1_test1.input");
+  map = loadStrings("day06_part_1.input");
   pixelSize = size_in_pixel / (2 /* border */ + max(map.length, map[0].length()));
 }
 
 public enum Movement {
 
-  UP(-1, 0),
-  RIGHT(0,1),
-  DOWN(1,0),
-  LEFT(0, -1);
+  UP(-1, 0, GUARD_UP),
+  RIGHT(0,1, GUARD_RIGHT),
+  DOWN(1,0, GUARD_DOWN),
+  LEFT(0, -1, GUARD_LEFT);
 
   public final int vertical;
   public final int horizontal;
+  public final char guardChar;
 
-  Movement(int vertical, int horizontal) {
+  Movement(int vertical, int horizontal, char guardChar) {
     this.vertical = vertical;
     this.horizontal = horizontal;
+    this.guardChar = guardChar;
   }
 
   public Movement turnRight() {
@@ -59,6 +62,10 @@ String[] map;
 /** must be set in setup() */
 int pixelSize;
 
+/*  if true, the UI is updated after every step (Done with SPACE bar).
+    if false, the simulation is run automatically and the UI is not updated. */
+boolean isUIUpdateActive = true;
+
 static final int size_in_pixel = 600;
 final int COLOR_OBSTRUCTION = 0;
 final int COLOR_FLOOR = 150;
@@ -79,45 +86,53 @@ void draw() {
   
   int noOfVisited = 0;
   
-  /* Draw the border */
-  fill(#FC0FC0);
-  rect(0, 0, width - pixelSize, pixelSize, pixelSize, 0, 0, 0);
-  rect(width - pixelSize, 0, pixelSize, height-pixelSize, 0, pixelSize, 0, 0);
-  rect(pixelSize, height-pixelSize, width-pixelSize, pixelSize, 0, 0, pixelSize, 0);
-  rect(0, pixelSize, pixelSize, height - pixelSize, 0, 0, 0, pixelSize);
-  
-  /* Draw the map */
-  translate(pixelSize, pixelSize);
-  for (int lineIndex = 0; lineIndex < map.length; ++lineIndex) {
-   for (int charIndex = 0; charIndex < map[lineIndex].length(); ++charIndex){
-     char currChar = map[lineIndex].charAt(charIndex);
-     
-     if (currChar == OBSTRUCTION) {
-       fill(COLOR_OBSTRUCTION);
-     }
-     else if (IS_GUARD.contains("" + currChar)) {
-       fill(COLOR_GUARD);
-       drawGuardAt(charIndex, lineIndex, currChar);
+  if (isUIUpdateActive) {
+    /* Draw the border */
+    fill(#FC0FC0);
+    rect(0, 0, width - pixelSize, pixelSize, pixelSize, 0, 0, 0);
+    rect(width - pixelSize, 0, pixelSize, height-pixelSize, 0, pixelSize, 0, 0);
+    rect(pixelSize, height-pixelSize, width-pixelSize, pixelSize, 0, 0, pixelSize, 0);
+    rect(0, pixelSize, pixelSize, height - pixelSize, 0, 0, 0, pixelSize);
+    
+    /* Draw the map */
+    translate(pixelSize, pixelSize);
+    for (int lineIndex = 0; lineIndex < map.length; ++lineIndex) {
+     for (int charIndex = 0; charIndex < map[lineIndex].length(); ++charIndex){
+       char currChar = map[lineIndex].charAt(charIndex);
        
-       continue;
+       if (currChar == OBSTRUCTION) {
+         fill(COLOR_OBSTRUCTION);
+       }
+       else if (IS_GUARD.contains("" + currChar)) {
+         fill(COLOR_GUARD);
+         drawGuardAt(charIndex, lineIndex, currChar);
+         
+         continue;
+       }
+       else if (currChar == VISITED) {
+         fill(COLOR_VISITED);
+         ++noOfVisited;
+       }
+       else {
+         fill(COLOR_FLOOR);
+       }
+       
+       rect(charIndex * pixelSize, lineIndex * pixelSize, pixelSize, pixelSize);
      }
-     else if (currChar == VISITED) {
-       fill(COLOR_VISITED);
-       ++noOfVisited;
-     }
-     else {
-       fill(COLOR_FLOOR);
-     }
-     
-     rect(charIndex * pixelSize, lineIndex * pixelSize, pixelSize, pixelSize);
-   }
+    }
+  }
+  else {
+   doStep();
   }
   
   /* draw label */
   fill(255);
   textAlign(CENTER);
   textFont(labelFont);
-  text("Visited: " + noOfVisited, width / 2, height - pixelSize);
+  text(isUIUpdateActive
+    ? "Visited: " + noOfVisited
+    : "Simulating... Press Ö to stop."
+    , width / 2, height - pixelSize);
 }
 
 /**
@@ -149,8 +164,6 @@ void drawGuardAt(int x, int y, char guardChar){
      x * pixelSize, (y + 0.5) * pixelSize);
      break;
   }
-  
-  
 }
 
 /**
@@ -160,45 +173,51 @@ boolean doStep(){
   for (int x = 0; x < map[0].length(); ++x){
    for (int y = 0; y < map.length; ++y){
      char currChar = map[y].charAt(x);
-     int movementX = 0, movementY = 0;
-     if (IS_GUARD.contains("" + currChar)) {
-       switch (currChar) {
-         case GUARD_UP:
-           movementX = 0; movementY = -1;
-           break;
-         case GUARD_RIGHT:
-           movementX = 1; movementY = 0;
-           break;
-         case GUARD_DOWN:
-           movementX = 0; movementY = 1;
-           break;
-         case GUARD_LEFT:
-           movementX = -1; movementY = 0;
-           break;
-       }
+     Optional<Movement> currMovement = Movement.tryParseMovement(currChar);
        
-       int nextX = x + movementX;
-       int nextY = y + movementY;
-       
-       if (isOutOfBounds(nextX, nextY)) {
-         return false;
-       }
-       
-       if (map[nextY].charAt(nextX) == OBSTRUCTION) {
-         
-       }
+     if (currMovement.isEmpty()) {
+      continue; 
      }
+       
+     if (isOutOfBounds(x + currMovement.get().horizontal, y + currMovement.get().vertical)) {
+       isUIUpdateActive = true; // enable drawing UI.
+       return false;
+     }
+     
+     if (map[y + currMovement.get().vertical].charAt(x + currMovement.get().horizontal) == OBSTRUCTION) {
+       System.out.println("Encountering wall...");
+       currMovement = Optional.of(currMovement.get().turnRight());
+     }
+      // do step
+     map[y] = map[y].substring(0, x) + VISITED + map[y].substring(x + 1);
+     int nextX = x + currMovement.get().horizontal;
+     int nextY = y + currMovement.get().vertical;
+     map[nextY] = map[nextY].substring(0, nextX) + currMovement.get().guardChar + map[nextY].substring(nextX + 1);
+     
+     return true;
    }
   }
-  return true;
+  return false; // no guard was found
 }
 
 boolean isOutOfBounds(int x, int y) {
-  return x >= 0 && x < map[0].length() && y >= 0 && y < map.length;
+  return !(x >= 0 && x < map[0].length() && y >= 0 && y < map.length);
 }
 
 void keyPressed() {
   if (key == ' '){
-    doStep();
+    if (isUIUpdateActive) {
+      System.out.println("Did step: " + doStep());
+    }
+  }
+  
+  if (key == 'ö') {
+    isUIUpdateActive = !isUIUpdateActive;
+    if (!isUIUpdateActive) {
+      System.out.println("Simulating without UI!");
+    }
+    else {
+      System.out.println("Press or hold SPACE to do step(s).");
+    } 
   }
 }

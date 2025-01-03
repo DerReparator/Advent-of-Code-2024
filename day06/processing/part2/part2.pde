@@ -8,21 +8,11 @@ void setup() {
   labelFont = createFont("Arial", 14, true);
   
   map = loadStrings("day06_part_2_test1.input");
-  originalSimulatedMap = new String[map.length];
   mapBeforeSimulation = new String[map.length];
-  
-  simulatePart1();
+
   map = loadStrings("day06_part_2_test1.input"); // reset map
   
   pixelSize = size_in_pixel / (2 /* border */ + max(map.length, map[0].length()));
-}
-
-void simulatePart1(){
-  System.out.println("Simulating Part1...");
- while (doStep());
- System.out.println("Simulated Part 1. Result is stored in 'originalSimulatedMap'.");
- 
- transferMapInPlace(map, originalSimulatedMap);
 }
 
 class Point {
@@ -125,9 +115,7 @@ int noOfValidSimulations = 0;
 
 void draw() {
   background(51); // gray background
-  
-  int noOfVisited = 0;
-  
+    
   if (isUIUpdateActive) {
     /* Draw the border */
     fill(#FC0FC0);
@@ -232,7 +220,7 @@ void simulateOrDoStep() {
   else {
     /* within a simulation:
     1. do a step
-    2. check if the guard is exactly matching the original path
+    2. check if the guard is exactly matching an already visited place
     3. if he does: rewind the simulation
     4. if he doesn't: check if the simulation must end because of another exit condition
     */
@@ -256,16 +244,6 @@ void simulateOrDoStep() {
       }
     }
   }
-}
-
-boolean isCurrentGuardPositionExactlyInOriginalMap(Point currentGuard, String[] originalSimulatedMap) {
-  char symbolInOriginalSimulation = originalSimulatedMap[currentGuard.Y].charAt(currentGuard.X);
-  if (IS_VISITED.contains("" + symbolInOriginalSimulation)
-  && Movement.tryParseMovement(map[currentGuard.Y].charAt(currentGuard.X)).get().visitedChar == symbolInOriginalSimulation) {
-    return true; //<>//
-  }
-  
-  return false;
 }
 
 Point findGuardInMap(String[] map) throws IllegalStateException {

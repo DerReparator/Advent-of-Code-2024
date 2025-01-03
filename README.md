@@ -1,4 +1,4 @@
-# Adevent of Code 2024
+# Advent of Code 2024
 
 Here is how I felt about the different parts.
 
@@ -11,4 +11,4 @@ _Disclaimer:_ Days 01 - 03 are only estimates because I started this list only o
 | 03.12.2024 | 🎅🏼🎅🏼 | 🎅🏼🎅🏼🎅🏼 |
 | 04.12.2024 | 🎅🏼🎅🏼 | 🎅🏼 |
 | 05.12.2024 | 🎅🏼🎅🏼 | 🎅🏼🎅🏼 |
-| 06.12.2024 | 🎅🏼🎅🏼 |  |
+| 06.12.2024 | 🎅🏼🎅🏼 | 🎅🏼🎅🏼🎅🏼 |

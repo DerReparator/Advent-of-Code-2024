@@ -3,7 +3,7 @@ import pprint
 
 map = []
 
-with open(os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__), "./day06_part_2_test1.input")), 'r') as f:
+with open(os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__), "./day06_part_2.input")), 'r') as f:
     map = [[c for c in line.strip()] for line in f.readlines()]
 
 directions = [(0, -1), (1, 0), (0, 1), (-1, 0)] # UP, RIGHT, DOWN, LEFT
@@ -44,7 +44,8 @@ for y in range(len(map)):
                 dir %= len(directions)
             curr_x, curr_y = curr_x + directions[dir][0], curr_y + directions[dir][1]
             if (curr_x, curr_y, dir) in visited:
-                print(f"LOOP FOUND @[{curr_x:3d}, {curr_y:3d}, dir={dir}] for Obstacle @[{x:3d}, {y:3d}]")
+                #print(f"LOOP FOUND @[{curr_x:3d}, {curr_y:3d}, dir={dir}] for Obstacle @[{x:3d}, {y:3d}]")
                 LOOPS_FOUND += 1
                 break
-        print(f"{PROGRESS:5d} / {TOTAL_FIELDS:5d} [{LOOPS_FOUND:4d}]")
+        if PROGRESS % (TOTAL_FIELDS // 100) == 0:
+            print(f"{(PROGRESS * 100) // TOTAL_FIELDS:3d}% [{LOOPS_FOUND:4d}]")

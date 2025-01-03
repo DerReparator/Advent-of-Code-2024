@@ -85,7 +85,49 @@ public class Solution
 	 * @return The solution to the second part.
 	 */
 	protected static Object solvePart2(String input) {
-		/* TODO your solution for Part 2 goes here. */        
-        return "";
+		String[] inputLineByLine = input.split(System.lineSeparator());
+      
+		long sum = 0;
+
+		for (String line : inputLineByLine) {
+			Optional<Long> solution = isEquationSolvableWithConcat(
+				Long.parseLong(line.split(": ")[0]),
+				Arrays.asList(line.split(": ")[1].split(" "))
+				.stream().map(Long::parseLong).collect(Collectors.toList()));
+			if (solution.isPresent()) {
+				sum += solution.get();
+			}
+		}
+
+        return sum;
 	}
+
+	private static Optional<Long> isEquationSolvableWithConcat(long requiredSum, List<Long> terms) {
+		long operatorId = -1;
+		while (++operatorId < (long)Math.pow(3, terms.size() - 1)) {
+			String stringifiedNumber = Long.toString(operatorId, 3);
+			long result = calculateEquationWithConcat(terms, "0".repeat(terms.size() - 1 - stringifiedNumber.length()) + stringifiedNumber);
+			if (result == requiredSum) {
+				return Optional.of(result);
+			}
+		}
+		return Optional.empty();
+	}
+
+	private static long calculateEquationWithConcat(List<Long> terms, String operators) {
+		long result = terms.get(0);
+		for (int i = 0; i < terms.size() - 1; ++i) {
+			if (operators.charAt(i) == '0') {
+				result += terms.get(i + 1);
+			}
+			else if (operators.charAt(i) == '1') {
+				result *= terms.get(i + 1);
+			}
+			else {
+				result = Long.parseLong("" + result + terms.get(i + 1));
+			}
+		}
+		return result;
+	}
+
 }

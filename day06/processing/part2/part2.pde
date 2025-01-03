@@ -1,7 +1,10 @@
 import java.util.Optional;
 
+static final int size_in_pixel = 900;
+
 void setup() {
-  size(600, 600);
+  size(69, 69);
+  windowResize(size_in_pixel, size_in_pixel);
   frameRate(1000);
   surface.setTitle("AoC 2024 - Day 06, Part 2");
   
@@ -9,8 +12,6 @@ void setup() {
   
   map = loadStrings("day06_part_2_test1.input");
   mapBeforeSimulation = new String[map.length];
-
-  map = loadStrings("day06_part_2_test1.input"); // reset map
   
   pixelSize = size_in_pixel / (2 /* border */ + max(map.length, map[0].length()));
 }
@@ -105,7 +106,6 @@ int pixelSize;
     if false, the simulation is run automatically and the UI is not updated. */
 boolean isUIUpdateActive = true;
 
-static final int size_in_pixel = 600;
 final int COLOR_OBSTRUCTION = 0;
 final int COLOR_FLOOR = 150;
 final int COLOR_VISITED = 200;

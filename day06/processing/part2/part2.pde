@@ -29,6 +29,20 @@ class Point {
   }
 }
 
+class PointWithDirection {
+  final Point pos;
+  final Movement movement;
+  
+  PointWithDirection(Point p, Movement m) {
+   pos = p;
+   movement = m;
+  }
+  
+  public String toString() {
+   return "@" + pos.toString() + "->" +  "[" + movement.horizontal + ";" + movement.vertical + "]";
+  }
+}
+
 public enum Movement {
 
   UP(-1, 0, GUARD_UP, VISITED_UP),
@@ -142,7 +156,6 @@ void draw() {
        else if (IS_VISITED.contains("" + currChar)) {
          fill(COLOR_VISITED);
          drawGuardAt(charIndex, lineIndex, currChar);
-         ++noOfVisited;
          continue;
        }
        else {
@@ -224,17 +237,20 @@ void simulateOrDoStep() {
     3. if he does: rewind the simulation
     4. if he doesn't: check if the simulation must end because of another exit condition
     */
-      doStep();
-    
-    Point guardPos = findGuardInMap(map);
-    if (isCurrentGuardPositionExactlyInOriginalMap(guardPos, originalSimulatedMap)) {
-      addToValidSimulation(guardPos);
+    Optional<PointWithDirection> newPos = computeNextStep();
+    if (!newPos.isEmpty()) {
+     /* the next step is valid. check if it already exists */
+     
+    if (map[newPos.get().pos.Y].charAt(newPos.get().pos.X) == newPos.get().movement.visitedChar) {
+      addToValidSimulation(newPos.get().pos);
       transferMapInPlace(mapBeforeSimulation, map);
       doStep();
       System.out.println("Simulation ends successful.");
       isSimulated = false;
     }
     else {
+      doStep();
+      Point guardPos = findGuardInMap(map);
       Movement guardMovement = Movement.tryParseMovement(map[guardPos.Y].charAt(guardPos.X)).get();
       if (isOutOfBounds(guardPos.X + guardMovement.horizontal, guardPos.Y + guardMovement.vertical)) {
          transferMapInPlace(mapBeforeSimulation, map);
@@ -242,6 +258,7 @@ void simulateOrDoStep() {
         System.out.println("Simulation ends UNsuccessful.");
         isSimulated = false;
       }
+    }
     }
   }
 }
@@ -300,6 +317,23 @@ Optional<Point> isSimulationStart(String[] map) {
 * Perform a single step based on the current map.
 */
 boolean doStep(){
+  Point guardPos = findGuardInMap(map);
+  Movement oldMovement = Movement.tryParseMovement(map[guardPos.Y].charAt(guardPos.X)).get();
+  Optional<PointWithDirection> nextPos = computeNextStep();
+  
+  if (nextPos.isEmpty()) {
+    /* out of bounds */
+    return false;
+  }
+  
+  map[guardPos.Y] = map[guardPos.Y].substring(0, guardPos.X) + oldMovement.visitedChar + map[guardPos.Y].substring(guardPos.X + 1);     
+
+  map[nextPos.get().pos.Y] = map[nextPos.get().pos.Y].substring(0, nextPos.get().pos.X) + nextPos.get().movement.guardChar + map[nextPos.get().pos.Y].substring(nextPos.get().pos.X + 1);
+  
+  return true;
+}
+
+Optional<PointWithDirection> computeNextStep() throws IllegalStateException {
   for (int x = 0; x < map[0].length(); ++x){
    for (int y = 0; y < map.length; ++y){
      char currChar = map[y].charAt(x);
@@ -311,11 +345,9 @@ boolean doStep(){
        
      if (isOutOfBounds(x + currMovement.get().horizontal, y + currMovement.get().vertical)) {
        isUIUpdateActive = true; // enable drawing UI.
-       return false;
-     }
-     
-      map[y] = map[y].substring(0, x) + currMovement.get().visitedChar + map[y].substring(x + 1);     
-     
+       return Optional.empty();
+     } //<>//
+          
      if (map[y + currMovement.get().vertical].charAt(x + currMovement.get().horizontal) == OBSTRUCTION) {
        System.out.println("Encountering wall...");
        currMovement = Optional.of(currMovement.get().turnRight());
@@ -323,12 +355,11 @@ boolean doStep(){
       // do step
      int nextX = x + currMovement.get().horizontal;
      int nextY = y + currMovement.get().vertical;
-     map[nextY] = map[nextY].substring(0, nextX) + currMovement.get().guardChar + map[nextY].substring(nextX + 1);
      
-     return true;
+     return Optional.of(new PointWithDirection(new Point(nextX, nextY), currMovement.get()));
    }
   }
-  return false; // no guard was found
+  throw new IllegalStateException("no guard was found");
 }
 
 boolean isOutOfBounds(int x, int y) {

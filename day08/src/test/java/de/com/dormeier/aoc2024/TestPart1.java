@@ -3,6 +3,9 @@ package de.com.dormeier.aoc2024;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+import java.awt.Point;
 
 import org.junit.jupiter.api.Test;
 
@@ -52,5 +55,20 @@ public class TestPart1 {
 		Object result = Solution.solvePart1(inputPart1OutOfMap);
 
 		assertEquals(expectedPart1OutOfMap, result.toString());
+	}
+
+	@Test
+	public void PointShouldBeHashable() {
+		Point pointA = new Point(1, 2);
+		Point pointB = new Point(3, 4);
+		Point pointC = new Point(1, 2);
+
+		Set<Point> points = new HashSet<>();
+
+		points.add(pointA);
+		points.add(pointB);
+		points.add(pointC);
+
+		assertEquals(2, points.size());
 	}
 }

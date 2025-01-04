@@ -106,7 +106,55 @@ public class Solution
 	 * @return The solution to the second part.
 	 */
 	protected static Object solvePart2(String input) {
-		/* TODO your solution for Part 2 goes here. */        
-        return "";
+		Map<Character, Set<Point>> frequencyPositions = new HashMap<>();
+		Set<Point> uniqueAntinodes = new HashSet<>();
+
+		String[] inputByLines = input.split(System.lineSeparator());
+		for (int y = 0; y < inputByLines.length; ++y) {
+			for (int x = 0; x < inputByLines[0].length(); ++x) {
+				char currChar = inputByLines[y].charAt(x);
+				if (currChar == '.') continue;
+
+				if (!frequencyPositions.containsKey(currChar)) {
+					frequencyPositions.put(currChar, new HashSet<>());
+				}
+				frequencyPositions.get(currChar).add(new Point(x, y));
+
+				System.out.println(String.format("Found %d different frequencies", frequencyPositions.size()));
+			}
+		}
+
+		for (Collection<Point> antennasOfFrequency : frequencyPositions.values()) {
+			uniqueAntinodes.addAll(findAllAntinodesForFrequencyPart2(inputByLines, antennasOfFrequency));
+		}
+
+		return uniqueAntinodes.size();
+	}
+
+	private static Set<Point> findAllAntinodesForFrequencyPart2(String[] map, Collection<Point> antennas) {
+		Set<Point> antinodes = new HashSet<>();
+
+		if (antennas.size() > 1) {
+			for (Point antenna : antennas) {
+				antinodes.add(antenna);
+			}
+		}
+		
+		for (Point antenna : antennas) {
+			for (Point partnerAntenna : antennas) {
+				if (partnerAntenna == antenna) continue;
+				Point potentialAntinode = new Point(partnerAntenna);
+				potentialAntinode.translate(partnerAntenna.x - antenna.x, partnerAntenna.y - antenna.y);
+				while (!isOutOfBounds(map, potentialAntinode)){
+					antinodes.add(new Point(potentialAntinode));
+					potentialAntinode.translate(partnerAntenna.x - antenna.x, partnerAntenna.y - antenna.y);
+				}
+			}
+		}	
+		
+		System.out.println(String.format("Found %3d unique, valid antinodes for Frequency %c",
+			antinodes.size(),
+			map[antennas.iterator().next().y].charAt(antennas.iterator().next().x)));
+		return antinodes;
 	}
 }

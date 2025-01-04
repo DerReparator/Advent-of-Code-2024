@@ -27,4 +27,17 @@ public class TestPart2 {
 
 		assertEquals(expectedPart2_1, result.toString());
 	}
+
+	@GivenTextResource("day08_part_2_testEasy.input")
+	String inputPart2Easy;
+	
+	@GivenTextResource("day08_part_2_testEasy.output")
+	String expectedPart2Easy;
+
+	@Test
+	public void TestPart2Easy() throws IOException {
+		Object result = Solution.solvePart1(inputPart2Easy);
+
+		assertEquals(expectedPart2Easy, result.toString());
+	}
 }

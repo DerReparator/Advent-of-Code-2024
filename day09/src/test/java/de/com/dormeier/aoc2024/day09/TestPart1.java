@@ -31,7 +31,7 @@ public class TestPart1 {
 	@Test
 	public void TestCompactDiskmap() {
 		String expected = "0099811188827773336446555566"; /* taken from adventofcode.com */
-		var result = Solution.CompactDiskMap(inputPart1_1);
+		var result = Solution.compactDiskMap(inputPart1_1);
 
 		assertEquals(expected, String.join("", result.stream().map(i -> i.toString()).toList()));
 	}

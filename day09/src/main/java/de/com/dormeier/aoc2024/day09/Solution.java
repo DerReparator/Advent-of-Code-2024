@@ -39,11 +39,21 @@ public class Solution
 	protected static Object solvePart1(String input) {
 		String diskmap = input;
 
-		List<Integer> compactedDiskmap = CompactDiskMap(diskmap);
-        return "";
+		List<Integer> compactedDiskmap = compactDiskMap(diskmap);
+		return calculateFilesystemChecksum(compactedDiskmap);
 	}
 
-	public static List<Integer> CompactDiskMap(String diskmap) {
+	public static long calculateFilesystemChecksum(List<Integer> compactedDiskmap) {
+		long checksum = 0;
+
+		for (int i = 0; i < compactedDiskmap.size(); ++i) {
+			checksum += i * compactedDiskmap.get(i);
+		}
+
+		return checksum;
+	}
+
+	public static List<Integer> compactDiskMap(String diskmap) {
 		List<Integer> expandedDiskmap = new ArrayList<>();
 		int idNumber = 0;
 

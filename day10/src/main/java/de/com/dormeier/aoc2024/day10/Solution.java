@@ -118,7 +118,59 @@ public class Solution
 	 * @return The solution to the second part.
 	 */
 	protected static Object solvePart2(String input) {
-		/* TODO your solution for Part 2 goes here. */        
-        return "";
+		String[] inputLineByLine = input.split("\n");
+		int[][] map = new int[inputLineByLine.length][inputLineByLine[0].strip().length()];
+		for (int y = 0; y < inputLineByLine.length; ++y) {
+			for (int x = 0; x < inputLineByLine[y].strip().length(); ++x) {
+				map[y][x] = inputLineByLine[y].charAt(x) == '.' ? -9999
+						: Integer.parseInt("" + inputLineByLine[y].charAt(x));
+			}
+		}
+
+		int totalRatings = 0;
+
+		for (int y = 0; y < map.length; ++y) {
+			for (int x = 0; x < map.length; ++x) {
+				if (map[y][x] == 0) {
+					totalRatings += calculateRatingFrom(map, x, y, -1, -1);
+				}
+			}
+		}
+
+		return totalRatings;
+	}
+
+	/**
+	 * This method tries to walk the trail further from {@code x}, {@code y} and
+	 * stores found peaks uniquely in the parameter {@code foundPeaks}
+	 * 
+	 * @param map
+	 * @param foundPeaks
+	 * @param x
+	 * @param y
+	 * @param prevX
+	 * @param prevY
+	 */
+	private static int calculateRatingFrom(int[][] map, int x, int y, int prevX, int prevY) {
+		System.out.println(String.format("Visiting [%3d;%3d] after [%3d;%3d]", x, y, prevX, prevY));
+
+		if (map[y][x] == 9) {
+			return 1;
+		}
+
+		int height = map[y][x];
+		int scoreOfThisPoint = 0;
+
+		for (int dir = 0; dir < dirY.length; ++dir) {
+			int nextX = x + dirX[dir];
+			int nextY = y + dirY[dir];
+
+			if (!isOutOfBounds(map, nextX, nextY) && !(nextX == prevX && nextY == prevY)
+					&& map[nextY][nextX] == height + 1) {
+				scoreOfThisPoint += calculateRatingFrom(map, nextX, nextY, x, y);
+			}
+		}
+
+		return scoreOfThisPoint;
 	}
 }

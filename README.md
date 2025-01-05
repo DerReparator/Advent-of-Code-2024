@@ -15,4 +15,4 @@ _Disclaimer:_ Days 01 - 03 are only estimates because I started this list only o
 | 07.12.2024 | 🎅🏼 | 🎅🏼🎅🏼 |
 | 08.12.2024 | 🎅🏼🎅🏼 | 🎅🏼 |
 | 09.12.2024 | 🎅🏼 | 🎅🏼🎅🏼🎅🏼 |
-| 10.12.2024 | 🎅🏼🎅🏼 |  |
+| 10.12.2024 | 🎅🏼🎅🏼 | 🎅🏼 This was super-easy, because I accidentally calculated this value by mistake in Part 1. |

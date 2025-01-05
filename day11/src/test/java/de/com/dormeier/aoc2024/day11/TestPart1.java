@@ -23,7 +23,7 @@ public class TestPart1 {
 
 	@Test
 	public void TestPart1_1() throws IOException {
-		Object result = Solution.solvePart1(inputPart1_1);
+		Object result = Solution.solvePart1(inputPart1_1, Solution.BLINKS_PART1);
 
 		assertEquals(expectedPart1_1, result.toString());
 	}

@@ -5,13 +5,17 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Advent of Code 2024 - Day 11
@@ -29,7 +33,7 @@ public class Solution
 		String inputPart2 = String.join(System.lineSeparator(), Files.readAllLines(Paths.get(args[1])));
 
 		// Object solutionPart1 = solvePart1(inputPart1, BLINKS_PART1);
-		Object solutionPart2 = solvePart2(inputPart2);
+		Object solutionPart2 = solvePart2(inputPart2, BLINKS_PART2);
 
 //		System.out.println("Solution Part 1: " + solutionPart1);
 		System.out.println("Solution Part 2: " + solutionPart2);
@@ -77,41 +81,40 @@ public class Solution
 	 * @param input The textual input
 	 * @return The solution to the second part.
 	 */
-	protected static Object solvePart2(String input) {
-		String[] stones = input.strip().split(" ");
+	protected static Object solvePart2(String input, int blinks) {
+		List<Long> stones = Arrays.stream(input.strip().split(" ")).map(s -> Long.parseLong(s)).collect(Collectors.toList());
 
-		System.out.println("the stones for Part 2: " + stones);
+		Map<Long, Long> stoneMap = new HashMap<>(stones.size());
 
-		ExecutorService threadPool = Executors.newFixedThreadPool(stones.length);
-
-		long totalSize = 0;
-
-		List<Future<Long>> threads = new ArrayList<Future<Long>>(stones.length);
-
-		for (String stone : stones) {
-			threads.add(threadPool.submit(new Callable<Long>() {
-				@Override
-				public Long call() throws Exception {
-					System.out.println("I will execute the stones for " + stone);
-					Long result = (Long) solvePart1(stone, BLINKS_PART2);
-					System.out.println("Done executing stones for " + stone);
-					return result;
-				}
-			}));
+		for (Long stone : stones) {
+			stoneMap.put(stone, 1L); // TODO this assumes that in the original input, no input is doubled.
 		}
 
-		for (Future<Long> completed : threads) {
-			try {
-				totalSize += completed.get();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				e.printStackTrace();
+		Map<Long, Long> stoneMapBeforeBlink;
+		for (int i = 1; i <= blinks; ++i) {
+			stoneMapBeforeBlink = stoneMap;
+			stoneMap = new HashMap<Long, Long>();
+
+			for (Long stone : stoneMapBeforeBlink.keySet()) {
+				if (stone == 0L) {
+					addStoneIntoMap(stoneMap, 1L, stoneMapBeforeBlink.get(0L));
+					continue;
+				}
+				String value = "" + stone;
+				if ( value.length() % 2 == 0L) {
+					addStoneIntoMap(stoneMap, Long.parseLong(value.substring(0, value.length() / 2)), stoneMapBeforeBlink.get(stone));
+					addStoneIntoMap(stoneMap, Long.parseLong(value.substring(value.length() / 2)), stoneMapBeforeBlink.get(stone));
+					continue;
+				}
+				Long newStone = stone * 2024L;
+				addStoneIntoMap(stoneMap, newStone, stoneMapBeforeBlink.get(stone));
 			}
 		}
 
-		threadPool.shutdown();
+		return stoneMap.values().stream().collect(Collectors.summingLong(Long::longValue));
+	}
 
-		return totalSize;
+	private static void addStoneIntoMap(Map<Long, Long> stones, Long stone, Long amount) {
+		stones.put(stone, stones.getOrDefault(stone, 0L) + amount);
 	}
 }

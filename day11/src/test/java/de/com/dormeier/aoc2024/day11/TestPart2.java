@@ -22,8 +22,8 @@ public class TestPart2 {
 	String expectedPart2_1;
 
 	@Test
-	public void TestPart2_1() throws IOException {
-		Object result = Solution.solvePart2(inputPart2_1);
+	public void TestPart2_1_with_25_blinks() throws IOException {
+		Object result = Solution.solvePart2(inputPart2_1, 25);
 
 		assertEquals(expectedPart2_1, result.toString());
 	}

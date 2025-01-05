@@ -2,7 +2,6 @@ package de.com.dormeier.aoc2024.day06;
 
 import java.awt.Point;
 import java.io.IOException;
-import java.lang.foreign.Linker.Option;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collection;

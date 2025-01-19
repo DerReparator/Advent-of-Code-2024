@@ -1,4 +1,4 @@
-# Advent of Code 2024 - Day 12, Part 1
+'''Advent of Code 2024 - Day 12, Part 1'''
 
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -21,9 +21,10 @@ class Region:
 
     def calculate_no_of_edges(self) -> int:
         no_of_edge = 0
+        #print(f"Outside Edge Parts: {self.outside_edge_parts}")
         while len(self.outside_edge_parts) > 0:
             edge_part = self.outside_edge_parts.pop()
-            curr_edge = []
+            curr_edge = [edge_part]
             curr_edge_part = edge_part
             # run in one direction
             search_direction_index = (curr_edge_part[0] + 1) % len(dirX)
@@ -32,16 +33,20 @@ class Region:
                 self.outside_edge_parts.remove(next_edge_part)
                 curr_edge_part = next_edge_part
             # run in other direction
-            search_direction_index = curr_edge_part[0] - 1
+            search_direction_index = (edge_part[0] - 1) % len(dirX)
+            curr_edge_part = edge_part
             while (next_edge_part := (curr_edge_part[0], (curr_edge_part[1][0] + dirX[search_direction_index], curr_edge_part[1][1] + dirY[search_direction_index]))) in self.outside_edge_parts:
                 curr_edge.append(next_edge_part)
                 self.outside_edge_parts.remove(next_edge_part)
                 curr_edge_part = next_edge_part
+            print(f"Found edge: {curr_edge}")
             no_of_edge += 1
         return no_of_edge
 
     def calculate_cost(self) -> int:
-        return self.calculate_no_of_edges() * self.area
+        no_of_edges: int = self.calculate_no_of_edges()
+        print(f"Cost: Edges {no_of_edges} x {self.area} Area")
+        return no_of_edges * self.area
 
 class Solution:
     def __init__(self):
@@ -60,9 +65,11 @@ class Solution:
                     total_price += complete_region.calculate_cost()
         return total_price
     
-    def discover_new_region(self, startPoint: Tuple[int, int]):
+    def discover_new_region(self, start_point: Tuple[int, int]):
+        print(f"Starting to discover Region {self.map[start_point[1]][start_point[0]]} from {start_point}")
         region = Region()
-        self.visit_point(startPoint, region)
+        self.visit_point(start_point, region)
+        print(f"Discovered Region: {region}")
         return region
 
     def visit_point(self, point: Tuple[int, int], region: Region):
@@ -71,11 +78,11 @@ class Solution:
         self.handledSpots.add(point)
         region.area += 1
         x,y = point
-        for dir in range(len(dirX)):
-            next_point = (x + dirX[dir], y + dirY[dir])
+        for direction, dir_x in enumerate(dirX):
+            next_point = (x + dir_x, y + dirY[direction])
             if self.is_out_of_bounds(next_point)\
-            or self.map[y + dirY[dir]][x + dirX[dir]] != self.map[y][x]:
-                region.outside_edge_parts.add((dir, point))
+            or self.map[y + dirY[direction]][x + dir_x] != self.map[y][x]:
+                region.outside_edge_parts.add((direction, point))
             else:
                 self.visit_point(next_point, region)
             
